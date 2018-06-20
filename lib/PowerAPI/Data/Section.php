@@ -20,16 +20,23 @@ class Section extends BaseObject
     public function __construct($details)
     {
         $this->details['assignments'] = $details['assignments'];
-
         $this->details['expression'] = $details['section']->expression;
+        $this->details['startDate'] = $details['section']->enrollments->startDate;
+        $this->details['endDate'] = $details['section']->enrollments->endDate;
 
         if ($details['finalGrades'] !== null) {
             $this->details['finalGrades'] = Array();
-
-            foreach ($this->details['finalGrades'] as $finalGrade) {
+            foreach ($details['finalGrades'] as $finalGrade) {
                 $this->details['finalGrades'][
-                    $details['reportingTerms'][$finalGrade->reportingTermId]
-                ] = $finalGrade->percent;
+                    $details['reportingTerms'][$finalGrade->reportingTermId]->abbr
+                ] = (object)array(
+                    'percent'=> $finalGrade->percent,
+                    'letter' => $finalGrade->grade,
+                    'comment' => $finalGrade->commentValue,
+                    'eval' => isset($details['citizenGrades'][$finalGrade->reportingTermId]) ? $details['citizenGrades'][$finalGrade->reportingTermId]->codeName:"--",
+                    'startDate' => $details['reportingTerms'][$finalGrade->reportingTermId]->startDate,
+                    'endDate' => $details['reportingTerms'][$finalGrade->reportingTermId]->startDate
+                );
             }
         } else {
             $this->details['finalGrades'] = null;

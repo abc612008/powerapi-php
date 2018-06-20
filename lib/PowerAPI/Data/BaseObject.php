@@ -3,7 +3,7 @@
 namespace PowerAPI\Data;
 
 /** Handles the basic overrides that data holding classes make use of. */
-class BaseObject
+class BaseObject implements \JsonSerializable
 {
     /** Details store for the object
      * @var array
@@ -38,5 +38,9 @@ class BaseObject
     public function __isset($name)
     {
         return isset($this->details[$name]);
+    }
+    
+    public function jsonSerialize() {
+        return $this->details;
     }
 }
