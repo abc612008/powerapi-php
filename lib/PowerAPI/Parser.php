@@ -194,9 +194,13 @@ class Parser
         $citizenCodes = Parser::groupById($rawCitizenCodes);
         
         $citizenGrades = Array();
-        foreach ($rawCitizenGrades as $citizenGrade) {
-            $citizenGrades[$citizenGrade->reportingTermId] = $citizenCodes[$citizenGrade->codeId];
-        }
+        if(is_array($rawCitizenGrades)){
+            foreach ($rawCitizenGrades as $citizenGrade) {
+                if(!isset($citizenCodes[$citizenGrade->codeId])) continue;
+                $citizenGrades[$citizenGrade->reportingTermId] = $citizenCodes[$citizenGrade->codeId];
+            }
+	}else if(isset($citizenCodes[$rawCitizenGrades->codeId]))
+	    $citizenGrades[$rawCitizenGrades->reportingTermId] = $citizenCodes[$rawCitizenGrades->codeId];
         return $citizenGrades;
     }
     
