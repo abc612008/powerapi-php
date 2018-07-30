@@ -144,31 +144,37 @@ class Student extends BaseObject
             $this->details['attendances'] = array();
             return;
         }
-        
-        $assignmentCategories = \PowerAPI\Parser::assignmentCategories($studentData->assignmentCategories);
-        $assignmentScores = \PowerAPI\Parser::assignmentScores($studentData->assignmentScores);
-        $finalGrades = \PowerAPI\Parser::finalGrades($studentData->finalGrades);
-        $reportingTerms = \PowerAPI\Parser::reportingTerms($studentData->reportingTerms);
-        $teachers = \PowerAPI\Parser::teachers($studentData->teachers);
-        $citizenGrades = \PowerAPI\Parser::citizenGrades($studentData->citizenGrades, $studentData->citizenCodes);
-        $attendanceCodes = \PowerAPI\Parser::groupById($studentData->attendanceCodes);
+        if(isset($studentData->assignmentCategories)&&isset($studentData->assignmentScores)
+            &&isset($studentData->assignments)&&isset($studentData->reportingTerms)&&isset($studentData->teachers)
+            &&isset($studentData->citizenGrades)&&isset($studentData->citizenCodes)&&isset($studentData->attendanceCodes)){        
+            $assignmentCategories = \PowerAPI\Parser::assignmentCategories($studentData->assignmentCategories);
+            $assignmentScores = \PowerAPI\Parser::assignmentScores($studentData->assignmentScores);
+            $finalGrades = \PowerAPI\Parser::finalGrades($studentData->finalGrades);
+            $reportingTerms = \PowerAPI\Parser::reportingTerms($studentData->reportingTerms);
+            $teachers = \PowerAPI\Parser::teachers($studentData->teachers);
+            $citizenGrades = \PowerAPI\Parser::citizenGrades($studentData->citizenGrades, $studentData->citizenCodes);
+            $attendanceCodes = \PowerAPI\Parser::groupById($studentData->attendanceCodes);
 
-        $assignments = \PowerAPI\Parser::assignments(
-            $studentData->assignments,
-            $assignmentCategories,
-            $assignmentScores,
-            $reportingTerms
-        );
-
-        $this->details['sections'] = \PowerAPI\Parser::sections(
-            $studentData->sections,
-            $assignments,
-            $finalGrades,
-            $reportingTerms,
-            $teachers,
-            $citizenGrades
-        );
+            $assignments = \PowerAPI\Parser::assignments(
+                $studentData->assignments,
+                $assignmentCategories,
+                $assignmentScores,
+                $reportingTerms
+            );
+            
+            $this->details['sections'] = \PowerAPI\Parser::sections(
+                $studentData->sections,
+                $assignments,
+                $finalGrades,
+                $reportingTerms,
+                $teachers,
+                $citizenGrades
+            );
         
+        }else{
+            $this->details['sections'] = Array();
+        }
+
         if(isset($studentData->attendance))
             $this->details['attendances'] = \PowerAPI\Parser::attendances($studentData->attendance, $attendanceCodes, $studentData->sections);
         else
