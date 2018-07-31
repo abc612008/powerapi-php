@@ -12,10 +12,11 @@ class Parser
      * @param array $assignmentScores array of assignment scores grouped by ID
      * @return array assignments grouped by section ID
     */
-    static public function assignments($rawAssignments, $assignmentCategories, $assignmentScores,$reportingTerms)
+    static public function assignments($rawAssignments, $assignmentCategories, $assignmentScores, $reportingTerms)
     {
         $assignments = Array();
 
+        if(!is_array($rawAssignments)) $rawAssignments=Array($rawAssignments);
         foreach ($rawAssignments as $assignment) {
             if (!isset($assignments[$assignment->sectionid])) {
                 $assignments[$assignment->sectionid] = Array();
@@ -47,6 +48,7 @@ class Parser
     {
         $assignmentCategories = Array();
 
+        if(!is_array($rawAssignmentCategories)) $rawAssignmentCategories=Array($rawAssignmentCategories);
         foreach ($rawAssignmentCategories as $assignmentCategory) {
             $assignmentCategories[$assignmentCategory->id] = $assignmentCategory;
         }
@@ -62,6 +64,7 @@ class Parser
     {
         $assignmentScores = Array();
 
+        if(!is_array($rawAssignmentScores)) $rawAssignmentScores=Array($rawAssignmentScores);
         foreach ($rawAssignmentScores as $assignmentScore) {
             if(!isset($assignmentScore->assignmentId)) continue;
             $assignmentScores[$assignmentScore->assignmentId] = $assignmentScore;
@@ -78,6 +81,7 @@ class Parser
     {
         $finalGrades = Array();
 
+        if(!is_array($rawFinalGrades)) $rawFinalGrades=Array($rawFinalGrades);
         foreach ($rawFinalGrades as $finalGrade) {
             if (!isset($finalGrades[$finalGrade->sectionid])) {
                 $finalGrades[$finalGrade->sectionid] = [];
@@ -97,6 +101,7 @@ class Parser
     {
         $reportingTerms = Array();
 
+        if(!is_array($rawReportingTerms)) $rawReportingTerms=Array($rawReportingTerms);
         foreach ($rawReportingTerms as $reportingTerm) {
             $reportingTerms[$reportingTerm->id] = (object)array(
                 "abbr" => $reportingTerm->abbreviation,
@@ -133,7 +138,7 @@ class Parser
     static public function sections($rawSections, $assignments, $finalGrades, $reportingTerms, $teachers, $citizenGrades)
     {
         $sections = Array();
-
+        if(!is_array($rawSections)) $rawSections=Array($rawSections);
         foreach ($rawSections as $section) {
             $sections[] = new Data\Section(Array(
                 'assignments' => Parser::requireDefined($assignments[$section->id]),
@@ -158,6 +163,7 @@ class Parser
     {
         $teachers = Array();
 
+        if(!is_array($rawTeachers)) $rawTeachers=Array($rawTeachers);
         foreach ($rawTeachers as $teacher) {
             $teachers[$teacher->id] = $teacher;
         }
@@ -191,55 +197,38 @@ class Parser
     
     static public function citizenGrades($rawCitizenGrades, $rawCitizenCodes)
     {
+        if(!is_array($rawCitizenGrades)) $rawCitizenGrades=Array($rawCitizenGrades);
         $citizenCodes = Parser::groupById($rawCitizenCodes);
         
         $citizenGrades = Array();
-        if(is_array($rawCitizenGrades)){
-            foreach ($rawCitizenGrades as $citizenGrade) {
-                if(!isset($citizenCodes[$citizenGrade->codeId])) continue;
-                $citizenGrades[$citizenGrade->reportingTermId] = $citizenCodes[$citizenGrade->codeId];
-            }
-	}else if(isset($citizenCodes[$rawCitizenGrades->codeId]))
-	    $citizenGrades[$rawCitizenGrades->reportingTermId] = $citizenCodes[$rawCitizenGrades->codeId];
+        foreach ($rawCitizenGrades as $citizenGrade) {
+            $citizenGrades[$citizenGrade->reportingTermId] = $citizenCodes[$citizenGrade->codeId];
+        }
         return $citizenGrades;
     }
     
     static public function attendances($rawAttendances, $attendanceCodes, $raw_sections)
     {
+        if(!is_array($rawAttendances)) $rawAttendances=Array($rawAttendances);
+        if(!is_array($raw_sections)) $raw_sections=Array($raw_sections);
         $attendances = Array();
 
         $sections=Array();
-            foreach ($raw_sections as $section){
+        foreach ($raw_sections as $section){
             $sections[$section->enrollments->id]=$section;
         }
-        $arr = (Array)$rawAttendances;
-        if(empty($arr)) return $attendances;
-        if(is_array($rawAttendances)){
-            foreach ($rawAttendances as $attendance) {
-                if(!isset($attendanceCodes[$attendance->attCodeid])) continue;
-                $description = $attendanceCodes[$attendance->attCodeid]->description;
-                if($description=="Present") $code = "P";
-                else $code = $attendanceCodes[$attendance->attCodeid]->attCode;
-                if($description==null || $code == null) continue;
-                $attendances[] = array(
-                    "code" => $code,
-                    "description" => $description,
-                    "date" => $attendance->attDate,
-                    "period" => $sections[$attendance->ccid]->expression,
-                    "name" => $sections[$attendance->ccid]->schoolCourseTitle
-                );
-            }
-        }else{
-            $description = $attendanceCodes[$rawAttendances->attCodeid]->description;
+        foreach ($rawAttendances as $attendance) {
+            if(!isset($attendanceCodes[$attendance->attCodeid])) continue;
+            $description = $attendanceCodes[$attendance->attCodeid]->description;
             if($description=="Present") $code = "P";
-            else $code = $attendanceCodes[$rawAttendances->attCodeid]->attCode;
-            if($description==null || $code == null) return $attendances;
+            else $code = $attendanceCodes[$attendance->attCodeid]->attCode;
+            if($description==null || $code == null) continue;
             $attendances[] = array(
                 "code" => $code,
                 "description" => $description,
-                "date" => $rawAttendances->attDate,
-                "period" => $sections[$rawAttendances->ccid]->expression,
-                "name" => $sections[$rawAttendances->ccid]->schoolCourseTitle
+                "date" => $attendance->attDate,
+                "period" => $sections[$attendance->ccid]->expression,
+                "name" => $sections[$attendance->ccid]->schoolCourseTitle
             );
         }
         return $attendances;

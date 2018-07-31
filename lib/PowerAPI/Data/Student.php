@@ -144,24 +144,46 @@ class Student extends BaseObject
             $this->details['attendances'] = array();
             return;
         }
-        if(isset($studentData->assignmentCategories)&&isset($studentData->assignmentScores)
-            &&isset($studentData->assignments)&&isset($studentData->reportingTerms)&&isset($studentData->teachers)
-            &&isset($studentData->citizenGrades)&&isset($studentData->citizenCodes)&&isset($studentData->attendanceCodes)){        
+        
+        if (isset($studentData->assignmentCategories))
             $assignmentCategories = \PowerAPI\Parser::assignmentCategories($studentData->assignmentCategories);
+        else $assignmentCategories = Array();
+        
+        if (isset($studentData->assignmentScores))
             $assignmentScores = \PowerAPI\Parser::assignmentScores($studentData->assignmentScores);
+        else $assignmentScores = Array();
+        
+        if (isset($studentData->finalGrades))
             $finalGrades = \PowerAPI\Parser::finalGrades($studentData->finalGrades);
+        else $finalGrades = Array();
+        
+        if (isset($studentData->reportingTerms))
             $reportingTerms = \PowerAPI\Parser::reportingTerms($studentData->reportingTerms);
+        else $reportingTerms = Array();
+        
+        if (isset($studentData->teachers))
             $teachers = \PowerAPI\Parser::teachers($studentData->teachers);
+        else $teachers = Array();
+        
+        if (isset($studentData->citizenGrades) && isset($studentData->citizenCodes))
             $citizenGrades = \PowerAPI\Parser::citizenGrades($studentData->citizenGrades, $studentData->citizenCodes);
+        else $citizenGrades = Array();
+        
+        if (isset($studentData->attendanceCodes))
             $attendanceCodes = \PowerAPI\Parser::groupById($studentData->attendanceCodes);
-
+        else $attendanceCodes = Array();
+        
+        if (isset($studentData->assignments))
             $assignments = \PowerAPI\Parser::assignments(
                 $studentData->assignments,
                 $assignmentCategories,
                 $assignmentScores,
                 $reportingTerms
             );
+        else
+            $assignments = Array();
             
+        if (isset($studentData->sections))
             $this->details['sections'] = \PowerAPI\Parser::sections(
                 $studentData->sections,
                 $assignments,
@@ -170,10 +192,8 @@ class Student extends BaseObject
                 $teachers,
                 $citizenGrades
             );
-        
-        }else{
+        else
             $this->details['sections'] = Array();
-        }
 
         if(isset($studentData->attendance))
             $this->details['attendances'] = \PowerAPI\Parser::attendances($studentData->attendance, $attendanceCodes, $studentData->sections);
