@@ -138,7 +138,9 @@ class Student extends BaseObject
             $message = $studentData->schools->schoolDisabledMessage;
             $this->details['disabled'] = (object)array(
                 "title" => $studentData->schools->schoolDisabledTitle,
-                "message" => $message?$message . "\n以上消息由学校提供，与 SchoolPower 无关。若有疑问，请联系学校。":$message
+                "message" => $message ? $message . "\n\n(以上消息由学校提供，与 SchoolPower 无关。若有疑问，请联系学校。"
+                ."\nThe above message is provided by school and is not related with SchoolPower."
+                    ."Please contact your school directly for any questions.)":$message
             );
             $this->details['sections'] = array();
             $this->details['attendances'] = array();
